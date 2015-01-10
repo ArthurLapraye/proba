@@ -1,3 +1,4 @@
+# coding: utf8
 # Copyright (c) 2013-2014 Matthew Honnibal, Guillaume Wisniewski, Oana
 # Jean-Marie
 
@@ -87,7 +88,8 @@ class Parse:
                           "rights={}".format(self.rights)])
 
 
-class AbstractParser(metaclass=abc.ABCMeta):
+class AbstractParser():
+     __metaclass__ = abc.ABCMeta
 
     """An abstract dependency parser that implements a
     transition-based strategy (either arc-hybrid or arc-eager).
@@ -232,7 +234,7 @@ class AbstractParser(metaclass=abc.ABCMeta):
 class ArcEagerParser(AbstractParser):
 
     def __init__(self, features):
-        super().__init__(features, ARC_EAGER_MOVES)
+        super(ArcEagerParser, self).__init__(features, ARC_EAGER_MOVES)
 
     def transition(self, move, i, stack, parse):
         if move == SHIFT:
@@ -304,7 +306,7 @@ class ArcEagerParser(AbstractParser):
 class ArcHybridParser(AbstractParser):
 
     def __init__(self, features):
-        super().__init__(features, ARC_HYBRID_MOVES)
+        super(ArcHybridParser, self).__init__(features, ARC_EAGER_MOVES)
 
     def transition(self, move, i, stack, parse):
         if move == SHIFT:
@@ -412,7 +414,7 @@ def dp_features(words, features, n0, stack, parse, history, delexicalized=False)
     """
     def add(name, *args):
         if delexicalized and "w" in name:
-            continue
+            return
 
         features[name.format(*args)] = 1
     
@@ -674,8 +676,8 @@ def test_dependency_parser(parser, dataset,
       if True, the POS tags given in the test are not considered and,
       during inference, the parser is used to predict them.
     """
-    correct = 0
-    n_words = 0
+    correct = 0.
+    n_words = 0.
 
     for words, tags, gold_heads, gold_labels in dataset:
         if not predict_pos_tags:
@@ -723,8 +725,8 @@ def train_dependency_parser(parser, sentences, n_epoch, listener=lambda x: x, it
     """
     for itn in range(n_epoch):
         listener.msg("start epoch n°{}".format(itn + 1))
-        corr = 0
-        total = 0
+        corr = 0.
+        total = 0.
         random.shuffle(sentences)
 
         for words, features, gold_parse, _ in listener.iter(sentences):
