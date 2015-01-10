@@ -20,7 +20,13 @@ usage=u"""
 	  """
 
 p = OptionParser(usage=usage)
-p.add_option("-m", "--matrice",
+
+
+p.add_option("-m", "--map", action="store", dest="mappingfile",default=None, 
+	help=u"Option pour offrir un fichier de mapping d'un jeu de tags aux tags universels")
+
+
+p.add_option("-c", "--confusion",
                   action="store_true", dest="matrice", default=False,
                   help=u"Cette option permet d'afficher les matrices de confusions pour chaque algorithme et de les comparer de façon plus fine.")
 
@@ -32,12 +38,24 @@ p.add_option("-a", "--absolute-values",
 
 #Variables globales
 TEST=9 
+MAPPINGFILE=op.mappingfile
 MATRICE=op.matrice
 PERCENT=op.percent
 LISSAGE= np.log2(10**-10)
 
+def mapit(tagmapfile):
+	tabz=re.compile("[\t\n]")
+	mapping={}
+	with open(tagmapfile) as tagmap:
+		for line in tagmap:
+			[ant,img,_]=tabz.split(line)
+			mapping[ant] = img
+	
+	return mapping
+			
 
-def liredonnees(filename):
+
+def liredonnees(filename,mapping=None):
 	tabz=re.compile("\t") #Expression régulière pour couper les lignes du fichier
 	test=[] #Corpus de test
 	sentence=[] #Liste de tuples mots/catégorie utilisée pour construire le corpus de test
@@ -58,6 +76,10 @@ def liredonnees(filename):
 		for line in fichier:
 			if line != '\n':
 				[a,word,lemm,_,cat, f,g,h,i,j ,k,l,m,n,o]=tabz.split(line)
+				
+				if mapping:
+					cat=mapping[cat]
+				
 				cats.add(cat)
 				
 				#[phranum,wordnum]=num.split(a)
@@ -144,7 +166,13 @@ if len(args) < 1:
 	print "Erreur : aucun corpus spécifié"
 	sys.exit(1)
 
-(test,matran,matrem,prevcounts,wordcounts,cats)=liredonnees(args[0])
+
+if MAPPINGFILE:
+	m=mapit(MAPPINGFILE)
+else:
+	m=None
+
+(test,matran,matrem,prevcounts,wordcounts,cats)=liredonnees(args[0],mapping=m)
 
 
 

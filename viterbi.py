@@ -15,6 +15,7 @@ def randchoice(cats,sentence):
 #attribuant systématiquement l'étiquette majoritaire à tous les mots de la phrase.
 def majoritywins(prevcounts):
 	u=0
+	prevcounts.pop("S")
 	for p in prevcounts:
 		z=prevcounts[p]
 		if z > u:
@@ -24,7 +25,7 @@ def majoritywins(prevcounts):
 	def majo(sentence):
 		return [commonest for a in sentence]
 	
-	print "Most common category :" + commonest
+	#print "Most common category :" + commonest
 	return majo
 
 #Cette fonction déduit une étiquette à partir de la meilleure probabilité contenue dans la matrice d'émission
