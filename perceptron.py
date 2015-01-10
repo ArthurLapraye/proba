@@ -21,4 +21,6 @@ def score(traits,poidsY):
 def classify(poids, traits):
 	
 	
-
+def train(mots):
+	pCat="s"
+	

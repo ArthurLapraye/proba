@@ -1,10 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+#Approche probabiliste du TAL - Arthur Lapraye - 2015
+
+#Algorithmes d'étiquetage morphosyntaxique naïfs 
+#Implémentation de l'algorithme de Viterbi pour l'étiquetage morphosyntaxique
+
 import numpy as np
 import random
 
 LISSAGE= np.log2(10**-10)
+
+#Dans toutes les fonctions suivantes :
+#cats est un ensemble (set) d'étiquettes morphosyntaxiques
+#Prevcounts contient l'ensemble des comptages 
+#matran[prevcat,cat] est la matrice de transition contenant les probabilités de transition entre une étiquette et la suivante
+#Ainsi qu'entre les limites de phrases (représentées par "S") et les catégories.
+#matrem est la matrice d'émission représentant la probabilité qu'un mot donné appartienne à une catégorie donnée
 
 #Algorithme étiquetant au hasard :-]  
 def randchoice(cats,sentence):
@@ -129,3 +141,5 @@ def viterbi(matran,matrem, cats,sentence):
 	bestseq.reverse()
 	
 	return bestseq[1:-1]
+
+
