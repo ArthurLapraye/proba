@@ -1,26 +1,41 @@
 #!/usr/bin/python 
 
 
-def argmax(f, Y):
-	return max(Y,key=f)
-	
-#for epoch in range(1, K):
-#	for 
-
-#traits= set()
-
 #Vu que les vecteurs de traits sont binaires, c'est plus logique de les représenter par des set() que par des dicts
-def score(traits,poidsY):
+def score(traits,poidY):
 	score=0;
+	
+	if len(poidY) > 0:
+		score=len(traits)
+	
 	for t in traits:
-		score += poidsY[t]
+		score += poidY[t]
 	
 	return score
-
-
-def classify(poids, traits):
-	
 	
 def train(mots):
 	pCat="s"
+
+def classify(poids, traits):
+	return max(poids,lambda x : score(traits, x))
+
+def perceptronmaker(cats,train):
+	poids=defaultdict(lambda : defaultdict(float))
+	accum=defaultdict(lambda : defaultdict(float))
+	
+	for cat in cats:
+		poids[cat]
+	
+	for (word,truecat) in train: 
+		traits=set([word,word[-2:],word[-3:],word[:2],word[:3]])
+		traits.update([prevcat,prevsuffix])
+		
+		cat=classify(poids,traits)
+	
+	
+	
+	
+	
+	
+	
 	

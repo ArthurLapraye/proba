@@ -58,8 +58,9 @@ def mapit(tagmapfile):
 def liredonnees(filename,mapping=None):
 	tabz=re.compile("\t") #Expression régulière pour couper les lignes du fichier
 	test=[] #Corpus de test
+	train=[] #corpus d'entraînement pour le perceptron
 	sentence=[] #Liste de tuples mots/catégorie utilisée pour construire le corpus de test
-	
+	https://twitter.com/jabial/status/554056246555574272
 	wordcounts = {} #comptage de mots 
 	prevcounts = {} #comptage de catégories
 	prevcounts = {} #comptage de catégories
@@ -97,11 +98,13 @@ def liredonnees(filename,mapping=None):
 			else:
 				if c == TEST:
 					test.append(sentence)
-					sentence=[]
+					
 				else:
 					matran[cat,"S"] = matran.get( (cat,"S"), 0.0) + 1
 					prevcat = "S"
+					train.append(sentence)
 				
+				sentence=[]
 				c = random.randint(0,TEST)
 					
 					
