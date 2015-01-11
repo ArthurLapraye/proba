@@ -12,9 +12,6 @@ def score(traits,poidY):
 		score += poidY[t]
 	
 	return score
-	
-def train(mots):
-	pCat="s"
 
 def classify(poids, traits):
 	return max(poids,lambda x : score(traits, x))
@@ -26,11 +23,20 @@ def perceptronmaker(cats,train):
 	for cat in cats:
 		poids[cat]
 	
-	for (word,truecat) in train: 
-		traits=set([word,word[-2:],word[-3:],word[:2],word[:3]])
-		traits.update([prevcat,prevsuffix])
+	for 1 in range(0, 100):
+		for (word,truecat) in train: 
+			traits=set([word,word[-2:],word[-3:],word[:2],word[:3]])
+			traits.update([prevcat,prevsuffix])
 		
-		cat=classify(poids,traits)
+			cat=classify(poids,traits)
+		
+			if cat != truecat:
+				for trait in traits:
+					poids[truecat][trait] += 1
+					poids[cat][trait] -= 1
+	
+	return poids
+	
 	
 	
 	
