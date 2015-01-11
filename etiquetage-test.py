@@ -10,6 +10,7 @@ import numpy as np
 import functools as funk
 from optparse import OptionParser
 from viterbi import *
+import perceptron as pers
 
 usage=u"""
 	./Lapraye-tp3.py [options] corpus
@@ -60,7 +61,6 @@ def liredonnees(filename,mapping=None):
 	test=[] #Corpus de test
 	train=[] #corpus d'entraînement pour le perceptron
 	sentence=[] #Liste de tuples mots/catégorie utilisée pour construire le corpus de test
-	https://twitter.com/jabial/status/554056246555574272
 	wordcounts = {} #comptage de mots 
 	prevcounts = {} #comptage de catégories
 	prevcounts = {} #comptage de catégories
@@ -116,7 +116,7 @@ def liredonnees(filename,mapping=None):
 		p,q=c
 		matrem[c]=np.log2(matrem[c]/prevcounts[p])
 	
-	return (test,matran,matrem,prevcounts,wordcounts,cats)
+	return (train,test,matran,matrem,prevcounts,wordcounts,cats)
 		
 #Fonction testant les algorithmes d'étiquetage sur le corpus de test.
 def testit(z):
@@ -143,6 +143,7 @@ def testit(z):
 				nice += 1.0
 			else:
 				errs += 1.0
+		
 	
 	if MATRICE:
 		#Les étiquettes de catégories réelles sont affichées à gauches
@@ -175,21 +176,24 @@ if MAPPINGFILE:
 else:
 	m=None
 
-(test,matran,matrem,prevcounts,wordcounts,cats)=liredonnees(args[0],mapping=m)
+(train,test,matran,matrem,prevcounts,wordcounts,cats)=liredonnees(args[0],mapping=m)
 
+ALL=False
 
+if ALL:
+	print "Sélection de la catégorie au hasard : "
+	testit(funk.partial(randchoice,cats)) 
+	print "Sélection de la catégorie la plus courante : " 
+	testit(majoritywins(prevcounts))
+	print "Sélection basée sur la catégorie la plus probable de la forme" 
+	testit(funk.partial(baseline2,matrem,cats))
 
-
-print "Sélection de la catégorie au hasard : "
-testit(funk.partial(randchoice,cats)) 
-print "Sélection de la catégorie la plus courante : " 
-testit(majoritywins(prevcounts))
-print "Sélection basée sur la catégorie la plus probable de la forme" 
-testit(funk.partial(baseline2,matrem,cats))
 print "Sélection basée sur le chemin localement optimal :"
 testit(funk.partial(naive,matran, matrem, cats, "S"))
 print "Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
 testit(funk.partial(viterbi,matran,matrem,cats))
+print "Perceptron"
+testit(pers.perceptronmaker(cats,train))
 
 #Les derniers algorithmes montrent des précisions globales assez proches, 
 #C'est en regardant dans les matrices de confusion qu'on voit que Viterbi est meilleur, 
