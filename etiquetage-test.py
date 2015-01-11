@@ -85,15 +85,14 @@ def liredonnees(filename,mapping=None):
 				
 				#[phranum,wordnum]=num.split(a)
 				
-				if c == TEST: 
-					sentence.append((word, cat))
-				else: 
+				sentence.append((word, cat))
+				
+				if c != TEST: 
 					prevcounts[prevcat] = prevcounts.get(cat,0.0) + 1
 					wordcounts[word] = wordcounts.get(word,0.0) + 1
 					matrem[cat,word] = matrem.get((cat,word), 0.0) +1
 					matran[prevcat,cat] = matran.get( (prevcat, cat), 0.0) + 1
 					prevcat = cat
-					
 				
 			else:
 				if c == TEST:
@@ -178,7 +177,7 @@ else:
 
 (train,test,matran,matrem,prevcounts,wordcounts,cats)=liredonnees(args[0],mapping=m)
 
-ALL=False
+ALL=True
 
 if ALL:
 	print "Sélection de la catégorie au hasard : "
@@ -187,26 +186,15 @@ if ALL:
 	testit(majoritywins(prevcounts))
 	print "Sélection basée sur la catégorie la plus probable de la forme" 
 	testit(funk.partial(baseline2,matrem,cats))
-
-print "Sélection basée sur le chemin localement optimal :"
-testit(funk.partial(naive,matran, matrem, cats, "S"))
-print "Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
-testit(funk.partial(viterbi,matran,matrem,cats))
+	print "Sélection basée sur le chemin localement optimal :"
+	testit(funk.partial(naive,matran, matrem, cats, "S"))
+	print "Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
+	testit(funk.partial(viterbi,matran,matrem,cats))
+	
 print "Perceptron"
-testit(pers.perceptronmaker(cats,train))
+weight=pers.perceptronmaker(cats,train)
+testit(funk.partial(pers.perceptron,weight))
 
-#Les derniers algorithmes montrent des précisions globales assez proches, 
-#C'est en regardant dans les matrices de confusion qu'on voit que Viterbi est meilleur, 
-#en particulier pour distinguer les clitiques et les déterminants.
-#On note que les catégories sont parfois douteuse : e.g. la catégorie ET contient les mots étrangers
-#Quels que soient leur contextes d'apparition. Elle mélange des mots qui appartiennent à des parties du discours différentes.
-#Quand Viterbi classe 36% d'entre eux parmi les noms, j'ai plus envie de le croire lui que de croire le corpus. 
-
-#Notons aussi que le fichier ftb2.txt fait apparaître une catégorie "Dmp" 
-#Elle n'apparaît que pour le nombre trois_cent_mille, et résulte d'une erreur de formatage. 
-#La ligne dit 
-#trois_cent_mille	trois_cent_mille	Dmp	NA	NA	NA	NA	NA	NA
-#Alors que ça devrait probablement être
-#trois_cent_mille	trois_cent_mille	D	NA	m	p	NA	NA	NA
-
+with open("weight","w") as w:
+	w.write(str(weight))
 
