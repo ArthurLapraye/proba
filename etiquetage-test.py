@@ -10,7 +10,7 @@ import numpy as np
 import functools as funk
 from optparse import OptionParser
 from viterbi import *
-import perceptron as pers
+from perceptron import *
 
 usage=u"""
 	./Lapraye-tp3.py [options] corpus
@@ -192,9 +192,8 @@ if ALL:
 	testit(funk.partial(viterbi,matran,matrem,cats))
 	
 print "Perceptron"
-weight=pers.perceptronmaker(cats,train)
-testit(funk.partial(pers.perceptron,weight))
 
-with open("weight","w") as w:
-	w.write(str(weight))
+weight=perceptronmaker(cats,train,20)
+
+testit(funk.partial(perceptron,weight))
 
