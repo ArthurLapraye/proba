@@ -31,6 +31,8 @@ p.add_option("-c", "--confusion",
                   action="store_true", dest="matrice", default=False,
                   help=u"Cette option permet d'afficher les matrices de confusions pour chaque algorithme et de les comparer de façon plus fine.")
 
+p.add_option("-i","--iteration", action="store",dest="iteration", default=20,help=u"Nombres d'itérations du perceptron")
+
 p.add_option("-a", "--absolute-values",
                   action="store_false", dest="percent", default=True,
                   help=u"Cette option permet de remplacer les pourcentages affichés par défaut par des valeurs absolues.")
@@ -42,7 +44,7 @@ TEST=9
 MAPPINGFILE=op.mappingfile
 MATRICE=op.matrice
 PERCENT=op.percent
-LISSAGE= np.log2(10**-10)
+ITERATIONS=int(op.iteration)
 
 def mapit(tagmapfile):
 	tabz=re.compile("[\t\n]")
@@ -151,7 +153,7 @@ def testit(z):
 		
 		print "Matrice de confusion :"
 		z=list(cats)
-		print "\t" +"\t".join(z)
+		print " " +" & ".join(z)
 		for ca in cats:
 			if realcats[ca] != 0.0:
 				if PERCENT:
@@ -159,7 +161,7 @@ def testit(z):
 				else:
 					p=[str(matcon[ca,a]) for a in z]
 					
-				print ca + "\t" + "\t".join(p)
+				print ca + " " + " & ".join(p) + "\\\\"
 	
 	precision= str(100*nice/wc)+"%" if PERCENT else str(nice) + "/" + str(wc)
 	print "Précision globale : " + precision  + "\n"
@@ -193,7 +195,8 @@ if ALL:
 	
 print "Perceptron"
 
-weight=perceptronmaker(cats,train,20)
+weight=perceptronmaker(cats,train,ITERATIONS)
 
 testit(funk.partial(perceptron,weight))
 
+print len(train), len(test)

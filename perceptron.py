@@ -1,6 +1,7 @@
 #!/usr/bin/python 
 # -*- coding: utf-8 -*-
 
+import random
 import functools as funk
 from collections import defaultdict
 
@@ -40,10 +41,10 @@ def perceptron(poids,sentence):
 	
 		return tags
 
-def perceptronmaker(cats,train,itermoi=10):
+def perceptronmaker(cats,train,itermoi=10,averaged=False):
 	poids=defaultdict(lambda : defaultdict(float))
 	accum=defaultdict(lambda : defaultdict(float))
-	
+	i=0.0
 	
 	for cat in cats:
 		poids[cat]
@@ -56,7 +57,7 @@ def perceptronmaker(cats,train,itermoi=10):
 			#prevword2="b2"
 			for word,truecat in sentence:
 				traits=getfeatures(word)
-				traits.update([prevcat,prevword1])
+				traits.update([prevcat,prevword1,'canard'])
 	
 				cat=classify(poids,traits)
 				#prevword2="2" + prevword1
@@ -67,9 +68,22 @@ def perceptronmaker(cats,train,itermoi=10):
 					for trait in traits:
 						poids[truecat][trait] = poids[truecat][trait] + 1
 						poids[cat][trait] = poids[cat][trait] - 1
-						
+				
+				i += 1
+				
+				if averaged:
+					for cat in poids:
+						for w in poids[cat]:
+							accum[cat][w] += poids[cat][w]
+				
+	if averaged:
+		for cat in poids:
+			for w in poids[cat]:
+				accum[cat][w] /= i
 			
-	return poids
+		return accum
+	else:
+		return poids
 	
 	
 	
