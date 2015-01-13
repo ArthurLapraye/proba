@@ -10,13 +10,13 @@
 \usepackage{fancyhdr}
 \usepackage{bussproofs}
 \usepackage{verbatim}
-\pagestyle{fancy}
 \usepackage{graphicx}
 \usepackage{wrapfig}
 \usepackage{listings}
 \usepackage{tikz-qtree}
 \usepackage{ulem}
 
+\pagestyle{fancy}
 
 \title{Approche probabiliste pour le TALN}
 \author{Arthur Lapraye\\Clément Beysson}
@@ -34,29 +34,31 @@
 
 \section{Introduction}
 
-Le but de ce projet est d'étudier les POS tagger sous plusieurs angles. 
+Le but de ce projet est d'étudier les POS taggers sous plusieurs angles. 
 
-Dans ce cadre, nous commencerons par traiter la qualité intrinsèque de divers algorithmes de POS tagging, chacun étant évalué sur l'ensemble de tag complet du corpus Tiger ainsi que sur l'esemble réduit des tag universaux.
+Dans ce cadre, nous commencerons par traiter la qualité intrinsèque de divers algorithmes de POS tagging, chacun étant évalué sur l'ensemble de tags complet du corpus Tiger ainsi que sur l'esemble réduit des tags universaux.
 
-Toujours dans ce but, nous génèrerons des matrices de confusion dans le but de verifier si certains tag ne seraient pas superflus car confondus avec d'autres. Cette similarité entre tag peut aussi être estimé à l'aide d'une distance entre vecteurs de poids.
+Toujours dans ce but, nous génèrerons des matrices de confusion dans le but de vérifier si certains tag ne seraient pas superflus car confondus avec d'autres. Cette similarité entre tags peut aussi être estimée à l'aide d'une distance entre vecteurs de poids.
 
+%C'est pas les POS tagger qui sont générés, ce sont les tags, non ?
 Pour finir, nous utiliserons les POS tagger générés dans un analyseur en dépendance. Ainsi, nous pourrons évaluer nos divers algorithmes et paramètres et optenir leur qualité extrinsèque vis à vis de cette tache.
+
 
 \section{Entraînement d'un POS tagger et précision intrinsèque}
 
-Pour tous nos POS tagger, nous avons utilisé le corpus Tiger. $10\%$ des phrases de ce corpus sont extraites aléatoirement pour servir de teste, les $90\%$ restantes serviront à l'entrainement.
+Pour tous nos POS tagger, nous avons utilisé le corpus Tiger. $10\%$ des phrases de ce corpus sont extraites aléatoirement pour servir de test, les $90\%$ restantes serviront à l'entrainement.
 
 Pour toute la suite, soit $S = w_1.w_2...w_n$ la phrase à analyser, composée dans l'ordre des mots $(w_i)_{i\in[1,n]}$.
 
 \subsection{Classe majoritaire par forme}
 
-Cette méthode excessiement naïve sera notre baseline. Il s'agit de prédir pour chaque mot le tag avec lequel il est le plus souvent associé dans le corpus. Il s'agit donc d'un modèle de Markov d'ordre 0. 
+Cette méthode excessivement naïve sera notre baseline. Il s'agit de prédir pour chaque mot-forme le tag avec lequel il est le plus souvent associé dans le corpus. Il s'agit donc d'un modèle de Markov d'ordre 0. 
 
 Pour l'entrainement, on compte le nombre d'occurence de chaque couple $(mot,tag\_gold)$ dans le corpus. Ces comptes seront nos paramètres pour la prédiction.
 
 $$\forall i \in [1,n] . tag(w_i) = argmax_{t \in Tag} \#(w_i,t)$$
 
-Lors de l'évaluation sur les tag riches, on obtient déjà $89.14\%$ de tag bien prédit sur le corpus de test. Pour les tag universaux, ce score monte à $90.86\%$. 
+Lors de l'évaluation sur les tag riches, on obtient déjà $89.1\%$ de tag bien prédit sur le corpus de test. Pour les tag universaux, ce score monte à $90.9\%$. 
 
 \subsubsection{Matrice de confusion}
 
@@ -70,7 +72,7 @@ $$
 
 \subsection{Chemin localement optimal}
 
-Nous avons souhaité tester un intermédiaire entre un modèle de Markov d'ordre 0 et celui d'ordre 1. Dans ce modèle, On cherche à prédire séquentiellement les tag des mots d'une phrase uniquement à l'aide du mot lui même et du tag déjà prédit pour le mot précédent. 
+Nous avons souhaité tester un intermédiaire entre un modèle de Markov d'ordre 0 et celui d'ordre 1. Dans ce modèle, on cherche à prédire séquentiellement les tag des mots d'une phrase uniquement à l'aide du mot lui même et du tag déjà prédit pour le mot précédent. 
 
 Pour l'entrainement, on compte le nombre d'occurence des triplets $(mot,tag\_gold,tag\_gold\_precedent)$, sachant que $tag\_gold\_precedent$ peut être le tag artificiel $debut\_de\_phrase$, dans le corpus. Ces comptes seront nos paramètres pour la prédiction.
 
@@ -78,11 +80,11 @@ On considère que $w_0$ a pour tag $debut\_de\_phrase$.
 
 $$\forall i \in [1,n] . tag (w_i) = argmax_{t \in Tag} \#(w_i,t,tag(w_{i-1}))$$
 
-Lors de l'évaluation sur les tag riches, cet algorithme obtient déjà $80.08\%$ de tag bien prédit sur le corpus de test. Pour les tag universaux, ce score monte à $87.74\%$. On observe que ces scores sont sous notre baseline, ce qui est contraire à nos attente. En effet, ce modèle nous semblait moins naïf et plus riche en informations. Nous n'étudierons plus ce modèle dans la suite.
+Lors de l'évaluation sur les tag riches, cet algorithme obtient déjà $80.1\%$ de tag bien prédit sur le corpus de test. Pour les tag universaux, ce score monte à $87.7\%$. On observe que ces scores sont sous notre baseline, ce qui est contraire à nos attente. En effet, ce modèle nous semblait moins naïf et plus riche en informations. Nous n'étudierons plus ce modèle dans la suite.
 
 \subsection{HMM}
 
-Il s'agit ici d'un modèle de Markov d'ordre 1. Ce modèle cherche à prédire les tag de tous les mots d'une phrase simultanément en sachant que la probabilité d'associé un tag à un mot donné ne dépend, comme précédement, que du mot et du tag précédent.
+Il s'agit ici d'un modèle de Markov d'ordre 1. Ce modèle cherche à prédire les tags de tous les mots d'une phrase simultanément en sachant que la probabilité d'associer un tag à un mot donné ne dépend, comme précédement, que du mot et du tag précédent.
 
 Pour l'entrainement, on procède exactement comme précédement pour obtenir les même paramètres.
 
@@ -92,27 +94,44 @@ $$\forall w \in Voc . \forall t_1,t_2 \in Tag^2 . prob(w,t_1,t_2) = log_2 \left(
 
 $$\forall i \in [1,n] . tag(w_i) = \underset{t_i \in Tag}{argmax} \left( \underset{t_1,...,t_{i-1},t_{i+1},...,t_n \in Tag^{n-1}}{max} \left( \underset{j \in [1,n]}{\Sigma}            prob(w_j,t_j,t_{j-1})            \right) \right)$$
 
-Ce calcul étant hautement exponentielle dans sa complexité, nous avons utilisé l'algorithme de Viterbi qui permet de se limiter à un cout polynomial.
+Ce calcul étant hautement exponentiel dans sa complexité, nous avons utilisé l'algorithme de Viterbi qui permet de se limiter à un coût polynomial.
 
-Lors de l'évaluation sur les tag riches, cet algorithme obtient déjà $93.96\%$ de tag bien prédit sur le corpus de test. Pour les tag universaux, ce score monte à $95.34\%$. 
+Lors de l'évaluation sur les tag riches, cet algorithme obtient déjà $94\%$ de tag bien prédit sur le corpus de test. Pour les tags universaux, ce score monte à $95.3\%$. 
 
 \subsubsection{Matrice de confusion}
 
-Cette matrice nous permet de voir si certains tag sont confondu avec d'autres. Cependant, il n'est pas possible de représenter ici la matrice $(52 \times 52)$ des tag riches. Nous exposerons donc ici seulement celles des tag universaux.
+Cette matrice nous permet de voir si certains tag sont confondus avec d'autres. Cependant, il n'est pas possible de représenter ici la matrice $(52 \times 52)$ des tags riches. Nous exposerons donc ici seulement celles des tag universaux.
 
 $$
 \begin{array}{l|c|c|c|c|c|c|c|c|c|c|c|c}
+& ADV & NOUN & NUM & ADP & PRON & DET & . & PRT & VERB & X & CONJ & ADJ\\
+ADV & 93\% & 0\% & 0\% & 1\% & 1\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 1\%\\
+NOUN & 0\% & 97\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\%\\
+NUM & 0\% & 2\% & 92\% & 0\% & 0\% & 3\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\%\\
+ADP & 0\% & 0\% & 0\% & 99\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\%\\
+PRON & 0\% & 0\% & 0\% & 0\% & 91\% & 4\% & 0\% & 0\% & 0\% & 0\% & 1\% & 0\%\\
+DET & 0\% & 0\% & 0\% & 0\% & 0\% & 99\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\%\\
+. & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 100\% & 0\% & 0\% & 0\% & 0\% & 0\%\\
+PRT & 1\% & 1\% & 0\% & 21\% & 0\% & 2\% & 0\% & 70\% & 0\% & 0\% & 0\% & 0\%\\
+VERB & 0\% & 2\% & 0\% & 0\% & 0\% & 0\% & 0\% & 0\% & 96\% & 0\% & 0\% & 0\%\\
+X & 0\% & 45\% & 0\% & 1\% & 0\% & 1\% & 3\% & 0\% & 3\% & 41\% & 1\% & 0\%\\
+CONJ & 2\% & 0\% & 0\% & 9\% & 2\% & 0\% & 0\% & 0\% & 0\% & 0\% & 86\% & 0\%\\
+ADJ & 0\% & 8\% & 0\% & 1\% & 0\% & 4\% & 0\% & 0\% & 2\% & 0\% & 0\% & 82\%\\
 
+Précision globale : 95.1523325928\% 
 \end{array}
 $$
 
 \subsection{Perceptron}
 
-Dans le modèle du perceptron, un mot dans le contexte de sa phrase est converti en un vecteur de dimension fixée contenant les informations jugées pertinantes le concernant, lui et son contexte. Chaque tag étant associé à une application multilinéaire sur un espace de même dimension, il suffit pour effectuer une prédiction d'appliquer ces applications au vecteur du mot et à prendre le tag donnant le meilleur score.
+Dans le modèle du perceptron, un mot dans le contexte de sa phrase est converti en un vecteur de dimension fixée contenant les informations jugées pertinentes le concernant, lui et son contexte. Chaque tag étant associé à une application multilinéaire sur un espace de même dimension, il suffit pour effectuer une prédiction d'appliquer ces applications au vecteur du mot et à prendre le tag donnant le meilleur score.
 
 Pour l'entrainement, il faut apprendre ces applications. Or, une application multilinéaire vers un espace de dimension 1 n'est rien d'autre qu'un produit scalaire. Il faut donc apprendre des vecteurs.
 
 On note $\overrightarrow{w}$ le vecteur représentatif du mot $w$ et de son contexte. De même, on note $\overrightarrow{t}$ le vecteur représentatif de l'application associée au tag $t$.
+
+%La précision du perceptron dépend beaucoup beaucoup plus des traits retenus que du nombre d'itérations, 
+%il faudra mentionner les traits utilisés 
 
 $$\forall i \in [1,n] . tag(w_i) = \underset{t \in Tag}{argmax}$$
 
@@ -122,7 +141,7 @@ $$\forall i \in [1,n] . tag(w_i) = \underset{t \in Tag}{argmax}$$
 
 \subsubsection{Matrice de confusion}
 
-Cette matrice nous permet de voir si certains tag sont confondu avec d'autres. Cependant, il n'est pas possible de représenter ici la matrice $(52 \times 52)$ des tag riches. Nous exposerons donc ici seulement celles des tag universaux.
+Cette matrice nous permet de voir si certains tags sont confondus avec d'autres. Cependant, il n'est pas possible de représenter ici la matrice $(52 \times 52)$ des tags riches, en raison de sa taille. Nous exposerons donc ici seulement celles des tags universaux.
 
 $$
 \begin{array}{l|c|c|c|c|c|c|c|c|c|c|c|c}

@@ -156,20 +156,18 @@ def testit(z):
 		if LATEX:
 			sep=" & "
 			endline="\\\\"
-			tab=" "
 			percentsign="\%"
 		else:
 			percentsign="%"
 			sep="\t"
 			endline=" "
-			tab=sep
 		
 		#Les étiquettes de catégories réelles sont affichées à gauches
 		#Les étiquettes prédites par l'algorithme sont affichées en haut
 		#Il me semble que c'est conventionnel.
 		print "Matrice de confusion :"
 		z=list(cats)
-		print tab +sep.join(z) + endline
+		print sep +sep.join(z) + endline
 		for ca in cats:
 			if realcats[ca] != 0.0:
 				if PERCENT:
