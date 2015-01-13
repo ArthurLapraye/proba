@@ -4,6 +4,7 @@
 #Approche probabiliste du TAL - Arthur Lapraye - 2015
 
 #Algorithmes d'étiquetage morphosyntaxique naïfs 
+# +
 #Implémentation de l'algorithme de Viterbi pour l'étiquetage morphosyntaxique
 
 import numpy as np

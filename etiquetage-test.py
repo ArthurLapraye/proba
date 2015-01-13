@@ -11,7 +11,6 @@ import functools as funk
 from optparse import OptionParser
 from viterbi import *
 from perceptron import *
-import cPickle as pickle
 
 usage=u"""
 	Usage:
@@ -158,7 +157,9 @@ def testit(z):
 			sep=" & "
 			endline="\\\\"
 			tab=" "
+			percentsign="\%"
 		else:
+			percentsign="%"
 			sep="\t"
 			endline=" "
 			tab=sep
@@ -172,18 +173,18 @@ def testit(z):
 		for ca in cats:
 			if realcats[ca] != 0.0:
 				if PERCENT:
-					p=[str((100*matcon[ca,a])/realcats[ca])+"%" for a in z]
+					p=[str((100*matcon[ca,a])/realcats[ca])+percentsign for a in z]
 				else:
 					p=[str(matcon[ca,a]) for a in z]
 					
-				print ca + tab + sep.join(p) + endline
+				print ca + sep + sep.join(p) + endline
 	
-	precision= str(100*nice/wc)+"%" if PERCENT else str(nice) + "/" + str(wc)
-	print "Précision globale : " + precision  + "\n"
+	precision= str(100*nice/wc)+percentsign if PERCENT else str(nice) + "/" + str(wc)
+	print u"Précision globale : " + precision  + "\n"
 
 #Programme :
 if len(args) < 1:
-	print "Erreur : aucun corpus spécifié"
+	print u"Erreur : aucun corpus spécifié"
 	sys.exit(1)
 
 
@@ -197,15 +198,15 @@ else:
 ALL=True
 
 if ALL:
-	print "Sélection de la catégorie au hasard : "
+	print u"Sélection de la catégorie au hasard : "
 	testit(funk.partial(randchoice,cats)) 
-	print "Sélection de la catégorie la plus courante : " 
+	print u"Sélection de la catégorie la plus courante : " 
 	testit(majoritywins(prevcounts))
-	print "Sélection basée sur la catégorie la plus probable de la forme" 
+	print u"Sélection basée sur la catégorie la plus probable de la forme" 
 	testit(funk.partial(baseline2,matrem,cats))
-	print "Sélection basée sur le chemin localement optimal :"
+	print u"Sélection basée sur le chemin localement optimal :"
 	testit(funk.partial(naive,matran, matrem, cats, "S"))
-	print "Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
+	print u"Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
 	testit(funk.partial(viterbi,matran,matrem,cats))
 	
 print "Perceptron"

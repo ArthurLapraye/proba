@@ -1,6 +1,10 @@
 #!/usr/bin/python 
 # -*- coding: utf-8 -*-
 
+#Approche probabiliste du TAL - Arthur Lapraye - 2015
+
+#Implémentation d'un perceptron
+
 import random
 import functools as funk
 from collections import defaultdict
@@ -10,7 +14,11 @@ def score(traits,poidY):
 	return sum([poidY[t] for t in traits])
 
 def getfeatures(word):
-	return set([word,"suff2_"+word[-2:],"pref2_" +word[:2] ]) #"suff3_" + word[-3:],"pref3_" + word[:3] ])
+	a=set([word,"suff3_" + word[-3:],"pref3_" + word[:3] ])
+	if word[0] in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		a.update('_CAPITAL_')
+	
+	return a
 
 def classify(poids, traits):
 	return max(poids.keys(),key=lambda x : score(traits, poids[x]))
@@ -20,18 +28,28 @@ def perceptron(poids,sentence):
 		tags=[]
 		
 		prevcat="S"
-		prevword1="b1"
-		prevword2="b2"
-		for word,_ in sentence:
-			traits=getfeatures(word)
-			traits.update([prevcat,prevword1,prevword2])
+		prevword1="_begin_"
+		#prevword2="b2"
+		lon=len(sentence)
+		prevtraits=set()
+		for  (pos,(word,_)) in enumerate(sentence):
+			t1=getfeatures(word)
+			
+			traits=set([prevcat,prevword1])
+			traits.update(prevtraits)
+			traits.update(t1)
+			
+			prevtraits=set([ "prev_"+trait for trait in t1])
+			
+			if pos == lon-1:
+				traits.update("_Findephrase_")
+			else:
+				traits.update(["next_"+p for p in getfeatures(sentence[pos+1][0])])
 	
 			cat=classify(poids,traits)
 			tags.append(cat)
-			if prevword1:
-				prevword2="2" + prevword1
 				
-			prevword1="prev_" + word
+			#prevword1="prev_" + word
 			prevcat=cat
 		
 	
@@ -49,37 +67,37 @@ def perceptronmaker(cats,train,itermoi=10,averaged=False):
 		print iterations
 		for sentence in train:
 			prevcat="S"
-			prevword1="b1"
-			#prevword2="b2"
-			for word,truecat in sentence:
-				traits=getfeatures(word)
-				traits.update([prevcat,prevword1,'canard'])
+			prevword1="_begin_"
+			lon=len(sentence)
+			prevtraits=set()
+			for  (pos,(word,truecat)) in enumerate(sentence):
+				
+				t1=getfeatures(word)
+				
+				traits=set([prevcat,prevword1])
+				traits.update(prevtraits)
+				traits.update(t1)
+				
+				prevtraits=set([ "prev_"+trait for trait in t1])
+				
+				if pos == lon-1:
+					traits.update("_Findephrase_")
+				else:
+					#traits.update("nextword_"+sentence[pos+1][0])
+					traits.update(["next_"+p for p in getfeatures(sentence[pos+1][0])])
 	
 				cat=classify(poids,traits)
 				#prevword2="2" + prevword1
-				prevword1="prev_" + word
+				#prevword1="prev_" + word
 				prevcat=cat
 				
 				if cat != truecat:
 					for trait in traits:
 						poids[truecat][trait] = poids[truecat][trait] + 1
 						poids[cat][trait] = poids[cat][trait] - 1
+	
 				
-				i += 1
-				
-				if averaged:
-					for cat in poids:
-						for w in poids[cat]:
-							accum[cat][w] += poids[cat][w]
-				
-	if averaged:
-		for cat in poids:
-			for w in poids[cat]:
-				accum[cat][w] /= i
-			
-		return accum
-	else:
-		return poids
+	return poids
 	
 	
 	
