@@ -1,7 +1,7 @@
 #!/usr/bin/python 
 # -*- coding: utf-8 -*-
 
-#Implémentation de l'algorithme de Viterbi - TP3 - Arthur Lapraye - 2014
+#Projet Approche Probabiliste du TAL - Arthur Lapraye - 2015
 
 import re
 import sys
@@ -11,17 +11,22 @@ import functools as funk
 from optparse import OptionParser
 from viterbi import *
 from perceptron import *
+import cPickle as pickle
 
 usage=u"""
-	./Lapraye-tp3.py [options] corpus
-	  Ce programme implémente l'algorithme de Viterbi pour l'étiquetage morpho-syntaxique, 
-	  ainsi que d'autres algorithmes plus simplistes afin d'en comparer les performances. 
-	  Il opère sur un corpus dont 90% est utilisé pour la création de matrices de transitions
-	  et d'émission, et 10% est utilisé pour tester les algorithmes. 
+	Usage:
+	./etiquetage-test.py [options] corpus
+	  Ce programme implémente l'algorithme de Viterbi et l'algorithme du perceptron
+	  pour l'étiquetage morpho-syntaxique,ainsi que d'autres algorithmes plus simplistes afin d'en comparer les performances. 
+	  
+	  Il opère sur un corpus dont 90% des phrases est utilisé 
+	  pour l'entraînement et 10% est utilisé pour tester les algorithmes,
+	  la répartition étant faite au hasard
 	  """
 
 p = OptionParser(usage=usage)
 
+p.add_option("-l","--latex",action="store_true",dest="latex",default=False, help=u"Option pour spécifier l'affichage des matrices de confusion selon la syntaxe LaTeX")
 
 p.add_option("-m", "--map", action="store", dest="mappingfile",default=None, 
 	help=u"Option pour offrir un fichier de mapping d'un jeu de tags aux tags universels")
@@ -45,6 +50,7 @@ MAPPINGFILE=op.mappingfile
 MATRICE=op.matrice
 PERCENT=op.percent
 ITERATIONS=int(op.iteration)
+LATEX=op.latex
 
 def mapit(tagmapfile):
 	tabz=re.compile("[\t\n]")
@@ -147,13 +153,22 @@ def testit(z):
 		
 	
 	if MATRICE:
+		
+		if LATEX:
+			sep=" & "
+			endline="\\\\"
+			tab=" "
+		else:
+			sep="\t"
+			endline=" "
+			tab=sep
+		
 		#Les étiquettes de catégories réelles sont affichées à gauches
 		#Les étiquettes prédites par l'algorithme sont affichées en haut
 		#Il me semble que c'est conventionnel.
-		
 		print "Matrice de confusion :"
 		z=list(cats)
-		print " " +" & ".join(z)
+		print tab +sep.join(z) + endline
 		for ca in cats:
 			if realcats[ca] != 0.0:
 				if PERCENT:
@@ -161,7 +176,7 @@ def testit(z):
 				else:
 					p=[str(matcon[ca,a]) for a in z]
 					
-				print ca + " " + " & ".join(p) + "\\\\"
+				print ca + tab + sep.join(p) + endline
 	
 	precision= str(100*nice/wc)+"%" if PERCENT else str(nice) + "/" + str(wc)
 	print "Précision globale : " + precision  + "\n"
@@ -199,4 +214,6 @@ weight=perceptronmaker(cats,train,ITERATIONS)
 
 testit(funk.partial(perceptron,weight))
 
-print len(train), len(test)
+print len(train), len(test),len(weight),[len(weight[x]) for x in weight]
+
+

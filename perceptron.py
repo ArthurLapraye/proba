@@ -7,11 +7,7 @@ from collections import defaultdict
 
 #Vu que les vecteurs de traits sont binaires, c'est plus logique de les représenter par des set() que par des dicts
 def score(traits,poidY):
-	
-	if len(poidY) == 0:
-		return len(traits)
-	else:
-		return sum([poidY[t] for t in traits])
+	return sum([poidY[t] for t in traits])
 
 def getfeatures(word):
 	return set([word,"suff2_"+word[-2:],"pref2_" +word[:2] ]) #"suff3_" + word[-3:],"pref3_" + word[:3] ])
