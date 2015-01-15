@@ -14,8 +14,8 @@ def score(traits,poidY):
 	return sum([poidY[t] for t in traits])
 
 def getfeatures(word):
-	a=set([word,"suff3_" + word[-3:],"pref3_" + word[:3] ])
-	if word[0] in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+	a=set([word,"suff3_" + word[-3:] ,"pref3_" + word[:3], "suff2_"+word[-2:], "pref2_"+word[:2] ])
+	if word[0] in u"ÄÖÜABCDEFGHIJKLMNOPQRSTUVWXYZ":
 		a.update('_CAPITAL_')
 	
 	return a
@@ -24,18 +24,20 @@ def classify(poids, traits):
 	return max(poids.keys(),key=lambda x : score(traits, poids[x]))
 
 
-def perceptron(poids,sentence):
+def perceptron_t(poids,sentence):
 		tags=[]
+		traitsmots=[]
+		truecats=[]
 		
+		lon=len(sentence)
 		prevcat="S"
 		prevword1="_begin_"
-		#prevword2="b2"
-		lon=len(sentence)
-		prevtraits=set()
-		for  (pos,(word,_)) in enumerate(sentence):
+		prevtraits=set(prevword1)
+		
+		for  (pos,(word,truecat)) in enumerate(sentence):
 			t1=getfeatures(word)
 			
-			traits=set([prevcat,prevword1])
+			traits=set([prevcat])
 			traits.update(prevtraits)
 			traits.update(t1)
 			
@@ -48,62 +50,35 @@ def perceptron(poids,sentence):
 	
 			cat=classify(poids,traits)
 			tags.append(cat)
+			truecats.append(truecat)
+			traitsmots.append(traits)
 				
-			#prevword1="prev_" + word
-			prevcat=cat
+			prevcat="prev_"+cat
 		
 	
-		return tags
+		return (tags,truecats,traitsmots)
+	
+def perceptron(poids,sentence):
+	return perceptron_t(poids,sentence)[0]
 
-def perceptronmaker(cats,train,itermoi=10,averaged=False):
-	poids=defaultdict(lambda : defaultdict(float))
-	accum=defaultdict(lambda : defaultdict(float))
-	i=0.0
+def perceptronmaker(cats,train,itermoi=10,poids=defaultdict(lambda : defaultdict(float))):
+	
+	#accum=defaultdict(lambda : defaultdict(float))
+	#i=0.0
 	
 	for cat in cats:
 		poids[cat]
 	
 	for iterations in range(0, itermoi):
-		print iterations
 		for sentence in train:
-			prevcat="S"
-			prevword1="_begin_"
-			lon=len(sentence)
-			prevtraits=set()
-			for  (pos,(word,truecat)) in enumerate(sentence):
-				
-				t1=getfeatures(word)
-				
-				traits=set([prevcat,prevword1])
-				traits.update(prevtraits)
-				traits.update(t1)
-				
-				prevtraits=set([ "prev_"+trait for trait in t1])
-				
-				if pos == lon-1:
-					traits.update("_Findephrase_")
-				else:
-					#traits.update("nextword_"+sentence[pos+1][0])
-					traits.update(["next_"+p for p in getfeatures(sentence[pos+1][0])])
-	
-				cat=classify(poids,traits)
-				#prevword2="2" + prevword1
-				#prevword1="prev_" + word
-				prevcat=cat
-				
+			for (cat,truecat,traits) in zip(*perceptron_t(poids,sentence)):
 				if cat != truecat:
 					for trait in traits:
 						poids[truecat][trait] = poids[truecat][trait] + 1
 						poids[cat][trait] = poids[cat][trait] - 1
-	
+					
+		print iterations+1
 				
 	return poids
-	
-	
-	
-	
-	
-	
-	
 	
 	

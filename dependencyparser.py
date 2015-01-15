@@ -651,8 +651,7 @@ def pad_tokens(tokens):
 # Main Interface
 # ===============
 
-def test_dependency_parser(parser, dataset,
-						   predict_pos_tags=False):
+def test_dependency_parser(parser, dataset, predict_pos_tags=False):
 	"""
 	Estimate the UAS achieved by a parser on a dataset
 

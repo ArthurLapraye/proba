@@ -5,6 +5,7 @@
 
 import re
 import sys
+import math
 import random
 import numpy as np
 import functools as funk
@@ -51,6 +52,15 @@ PERCENT=op.percent
 ITERATIONS=int(op.iteration)
 LATEX=op.latex
 
+if LATEX:
+	sep=" & "
+	endline="\\\\"
+	percentsign="\%"
+else:
+	percentsign="%"
+	sep="\t"
+	endline=" "
+
 def mapit(tagmapfile):
 	tabz=re.compile("[\t\n]")
 	mapping={}
@@ -78,12 +88,12 @@ def liredonnees(filename,mapping=None):
 	
 	prevcat = "S"	#Séparateur de phrases
 	
-	c=random.randint(0,TEST)
+	c=random.randint(0,TEST) # Tirage au sort pour l'assignation d'une phrase au corpus d'entraînement ou de test
 	
 	with open(filename) as fichier:
 		for line in fichier:
 			if line != '\n':
-				[a,word,lemm,_,cat, f,g,h,i,j ,k,l,m,n,o]=tabz.split(line)
+				[a,word,lemm,_,cat, f,g,h,i,j ,k,l,m,n,o]=tabz.split(line.decode("UTF-8"))
 				
 				if mapping:
 					cat=mapping[cat]
@@ -125,7 +135,7 @@ def liredonnees(filename,mapping=None):
 	return (train,test,matran,matrem,prevcounts,wordcounts,cats)
 		
 #Fonction testant les algorithmes d'étiquetage sur le corpus de test.
-def testit(z):
+def testit(z,M=MATRICE):
 	wc = 0.0	
 	nice = 0.0
 	errs = 0.0
@@ -151,16 +161,7 @@ def testit(z):
 				errs += 1.0
 		
 	
-	if MATRICE:
-		
-		if LATEX:
-			sep=" & "
-			endline="\\\\"
-			percentsign="\%"
-		else:
-			percentsign="%"
-			sep="\t"
-			endline=" "
+	if M:
 		
 		#Les étiquettes de catégories réelles sont affichées à gauches
 		#Les étiquettes prédites par l'algorithme sont affichées en haut
@@ -177,8 +178,21 @@ def testit(z):
 					
 				print ca + sep + sep.join(p) + endline
 	
-	precision= str(100*nice/wc)+percentsign if PERCENT else str(nice) + "/" + str(wc)
+	p=nice/wc
+	precision= str(100*p)+"%" if PERCENT else str(nice) + "/" + str(wc)
 	print u"Précision globale : " + precision  + "\n"
+	return p
+
+
+
+def manhattan(w1,w2):
+	return sum([ abs(w1[k]-w2[k]) for k in w1])
+
+def euclide(w1,w2):
+	return math.sqrt(sum([ (w1[k]-w2[k])**2 for k in w1]))
+	
+def distinfini(w1,w2):
+	return max([ abs(w1[k]-w2[k]) for k in w1])
 
 #Programme :
 if len(args) < 1:
@@ -206,13 +220,43 @@ if ALL:
 	testit(funk.partial(naive,matran, matrem, cats, "S"))
 	print u"Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
 	testit(funk.partial(viterbi,matran,matrem,cats))
-	
-print "Perceptron"
 
+
+print "Perceptron",ITERATIONS
 weight=perceptronmaker(cats,train,ITERATIONS)
+z=testit(funk.partial(perceptron,weight))
 
-testit(funk.partial(perceptron,weight))
+print "Taille du corpus d'entraînement :",len(train), "Taille du corpus de test : ", len(test)
+print "Nombre de tags :",len(weight)
+print [len(weight[x]) for x in weight]
 
-print len(train), len(test),len(weight),[len(weight[x]) for x in weight]
+if False:
+	for z in weight:
+		feats=(sorted(weight[z],key=lambda x : abs(weight[z][x]),reverse=True))
+		print "Meilleur traits pour "+z	
+		print "\n\t".join([ x+":"+str(weight[z][x]) for x in feats[:10] ])
+		print "Pire traits pour " + z
+		print "\n\t".join([ x+":"+str(weight[z][x]) for x in feats[-10:] ])
+	
+		#print "\t",x,weight[z][x]
+
+for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",distinfini)]:
+	print "Distance :",funcname
+	print sep+sep.join(weight.keys())
+	mini=0
+	(min1,min2)=(None,None)
+	for z in weight:
+		dists=[]
+		
+		for y in weight:
+			p=func(weight[z],weight[y])
+			dists.append(p)
+			if z != y and (p < mini or mini==0):
+				mini=p
+				(min1,min2)=(z,y)
+			
+		print z+sep+sep.join([str(int(x)) for x in dists])+" "+endline
+	print min1,min2
+	
 
 
