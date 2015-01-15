@@ -65,8 +65,6 @@ def perceptron(poids,sentence):
 	return perceptron_t(poids,sentence)[0]
 
 def perceptronmaker(cats,train,itermoi=10,poids=defaultdict(lambda : defaultdict(float))):
-	
-	accum=defaultdict(lambda : defaultdict(float))
 	update=defaultdict(lambda : defaultdict(float))
 	
 	for cat in cats:
@@ -79,17 +77,9 @@ def perceptronmaker(cats,train,itermoi=10,poids=defaultdict(lambda : defaultdict
 					for trait in traits:
 						poids[truecat][trait] = poids[truecat][trait] + 1
 						poids[cat][trait] = poids[cat][trait] - 1
-						if update[cat][trait] == 0:
-							accum[cat][trait]=poids[cat][trait]
-							accum[truecat][trait]=poids[truecat][trait]
-						else:
-							accum[cat][trait] = (update[cat][trait]*accum[cat][trait] + poids[cat][trait])/2
-							accum[truecat][trait] = (update[truecat][trait]*accum[truecat][trait] + poids[cat][trait])/2
-						update[cat][trait] +=1
-						update[truecat][trait] +=1
 					
 		print iterations+1
 				
-	return accum
+	return poids
 	
 	
