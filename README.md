@@ -1,1 +1,8 @@
-ceci est un test pour voir si je peux commit
+****Algorithmes****
+
+**Viterbi**
+
+**Perceptron**
+
+
+
