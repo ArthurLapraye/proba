@@ -242,7 +242,7 @@ if False:
 
 for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",distinfini)]:
 	print "Distance :",funcname
-	print sep+sep.join(weight.keys())
+	print sep+sep.join(weight.keys())+endline
 	mini=0
 	(min1,min2)=(None,None)
 	for z in weight:
