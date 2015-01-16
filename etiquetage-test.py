@@ -24,19 +24,21 @@ usage=u"""
 	  la répartition étant faite au hasard
 	  """
 
+#Paramètres du script
 p = OptionParser(usage=usage)
 
-p.add_option("-l","--latex",action="store_true",dest="latex",default=False, help=u"Option pour spécifier l'affichage des matrices de confusion selon la syntaxe LaTeX")
+p.add_option("-i","--iteration", action="store",dest="iteration", default=20,help=u"Nombres d'itérations du perceptron")
 
 p.add_option("-m", "--map", action="store", dest="mappingfile",default=None, 
-	help=u"Option pour offrir un fichier de mapping d'un jeu de tags aux tags universels")
+	help=u"Option prenant en paramètre un fichier de mapping d'un jeu de tags aux tags universels")
 
 
 p.add_option("-c", "--confusion",
                   action="store_true", dest="matrice", default=False,
                   help=u"Cette option permet d'afficher les matrices de confusions pour chaque algorithme et de les comparer de façon plus fine.")
 
-p.add_option("-i","--iteration", action="store",dest="iteration", default=20,help=u"Nombres d'itérations du perceptron")
+p.add_option("-l","--latex",action="store_true",dest="latex",default=False, help=u"Option pour spécifier l'affichage des matrices de confusion selon la syntaxe LaTeX. N'a pas d'effet si utilisé sans -c ou --confusion")
+
 
 p.add_option("-a", "--absolute-values",
                   action="store_false", dest="percent", default=True,
@@ -61,6 +63,9 @@ else:
 	sep="\t"
 	endline=" "
 
+#Fonction de mapping de tags
+#Prend en entrée un fichier .map, renvoie un dictionnaire permettant de retrouver le tag universel correspondant 
+#au tag riche donné en clef
 def mapit(tagmapfile):
 	tabz=re.compile("[\t\n]")
 	mapping={}
@@ -135,6 +140,9 @@ def liredonnees(filename,mapping=None):
 	return (train,test,matran,matrem,prevcounts,wordcounts,cats)
 		
 #Fonction testant les algorithmes d'étiquetage sur le corpus de test.
+#Et affichant optionnellement la matrice de confusion des algorithmes
+#Elle prend une fonction d'étiquetage en entrée, l'applique à la phrase
+#Et crée ensuite la matrice de confusion
 def testit(z,M=MATRICE):
 	wc = 0.0	
 	nice = 0.0
@@ -184,7 +192,7 @@ def testit(z,M=MATRICE):
 	return p
 
 
-
+#Fonctions de calcul de distance des vecteurs.
 def manhattan(w1,w2):
 	return sum([ abs(w1[k]-w2[k]) for k in w1])
 
@@ -207,19 +215,22 @@ else:
 
 (train,test,matran,matrem,prevcounts,wordcounts,cats)=liredonnees(args[0],mapping=m)
 
-ALL=True
+ALL=False #Changer à True pour montrer les algorithmes qui sont sous la baseline retenue
 
 if ALL:
 	print u"Sélection de la catégorie au hasard : "
 	testit(funk.partial(randchoice,cats)) 
 	print u"Sélection de la catégorie la plus courante : " 
 	testit(majoritywins(prevcounts))
-	print u"Sélection basée sur la catégorie la plus probable de la forme" 
-	testit(funk.partial(baseline2,matrem,cats))
+	
 	print u"Sélection basée sur le chemin localement optimal :"
 	testit(funk.partial(naive,matran, matrem, cats, "S"))
-	print u"Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
-	testit(funk.partial(viterbi,matran,matrem,cats))
+
+#Baseline
+print u"Sélection basée sur la catégorie la plus probable de la forme" 
+testit(funk.partial(baseline2,matrem,cats))
+print u"Sélection basée sur le chemin optimal déduit par l'algorithme de Viterbi :" 
+testit(funk.partial(viterbi,matran,matrem,cats))
 
 
 print "Perceptron",ITERATIONS
@@ -230,19 +241,25 @@ print "Taille du corpus d'entraînement :",len(train), "Taille du corpus de test
 print "Nombre de tags :",len(weight)
 print [len(weight[x]) for x in weight]
 
+#Ceci permet d'afficher les traits les plus informatifs et les moins informatifs.
+#L'utilisation de la valeur absolue permet de dégager aussi bien les traits prédicteurs que les traits
+#antiprédicteurs d'une catégorie donnée.
+#Il est désactivé parce que ça prend beaucoup de place dans le terminal.
 if False:
 	for z in weight:
 		feats=(sorted(weight[z],key=lambda x : abs(weight[z][x]),reverse=True))
 		print "Meilleur traits pour "+z	
-		print "\n\t".join([ x+":"+str(weight[z][x]) for x in feats[:10] ])
+		print "\n\t".join([ x+" : "+str(weight[z][x]) for x in feats[:10] ])
 		print "Pire traits pour " + z
-		print "\n\t".join([ x+":"+str(weight[z][x]) for x in feats[-10:] ])
+		print "\n\t".join([ x+" : "+str(weight[z][x]) for x in feats[-10:] ])
 	
 		#print "\t",x,weight[z][x]
 
+#Affichage des matrices de distances entre vecteurs 
 for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",distinfini)]:
-	print "Distance :",funcname
-	print sep+sep.join(weight.keys())+endline
+	if MATRICE:
+		print "Distance :",funcname
+		print sep+sep.join(weight.keys())+endline
 	mini=0
 	(min1,min2)=(None,None)
 	for z in weight:
@@ -254,9 +271,9 @@ for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",di
 			if z != y and (p < mini or mini==0):
 				mini=p
 				(min1,min2)=(z,y)
-			
-		print z+sep+sep.join([str(int(x)) for x in dists])+" "+endline
-	print min1,min2
+		if MATRICE:	
+			print z+sep+sep.join([str(int(x)) for x in dists])+" "+endline
+	print "Vecteur les plus proches :",min1,min2
 	
 
 
