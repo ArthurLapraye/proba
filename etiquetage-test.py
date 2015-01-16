@@ -239,12 +239,12 @@ z=testit(funk.partial(perceptron,weight))
 
 print "Taille du corpus d'entraînement :",len(train), "Taille du corpus de test : ", len(test)
 print "Nombre de tags :",len(weight)
-print [len(weight[x]) for x in weight]
+#print [len(weight[x]) for x in weight]
 
 #Ceci permet d'afficher les traits les plus informatifs et les moins informatifs.
 #L'utilisation de la valeur absolue permet de dégager aussi bien les traits prédicteurs que les traits
 #antiprédicteurs d'une catégorie donnée.
-#Il est désactivé parce que ça prend beaucoup de place dans le terminal.
+#C'est désactivé parce que ça prend beaucoup de place dans le terminal.
 if False:
 	for z in weight:
 		feats=(sorted(weight[z],key=lambda x : abs(weight[z][x]),reverse=True))
@@ -257,8 +257,8 @@ if False:
 
 #Affichage des matrices de distances entre vecteurs 
 for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",distinfini)]:
+	print "Distance utilisée :",funcname
 	if MATRICE:
-		print "Distance :",funcname
 		print sep+sep.join(weight.keys())+endline
 	mini=0
 	(min1,min2)=(None,None)
