@@ -256,7 +256,7 @@ if False:
 		#print "\t",x,weight[z][x]
 
 #Affichage des matrices de distances entre vecteurs 
-for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",distinfini)]:
+for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),(u"«Infini»",distinfini)]:
 	print "Distance utilisée :",funcname
 	if MATRICE:
 		print sep+sep.join(weight.keys())+endline
@@ -273,7 +273,7 @@ for (funcname,func) in [("Manhattan",manhattan),("Euclide",euclide),("Infini",di
 				(min1,min2)=(z,y)
 		if MATRICE:	
 			print z+sep+sep.join([str(int(x)) for x in dists])+" "+endline
-	print "Vecteur les plus proches :",min1,min2
+	print "Vecteurs les plus proches :",min1,min2
 	
 
 
