@@ -29,7 +29,7 @@ usage=u"""
 #Paramètres du script
 p = OptionParser(usage=usage)
 
-p.add_option("-i","--iteration", action="store",dest="iteration", default=20,help=u"Nombres d'itérations du perceptron")
+p.add_option("-i","--iteration", action="store",dest="iteration", default=20,help=u"Nombres d'itérations du perceptron. Par défaut 20.")
 
 p.add_option("-m", "--map", action="store", dest="mappingfile",default=None, 
 	help=u"Option prenant en paramètre un fichier de mapping d'un jeu de tags aux tags universels")
