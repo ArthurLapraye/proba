@@ -21,7 +21,9 @@ usage=u"""
 	  
 	  Il opère sur un corpus dont 90% des phrases est utilisé 
 	  pour l'entraînement et 10% est utilisé pour tester les algorithmes,
-	  la répartition étant faite au hasard
+	  la répartition étant faite au hasard.
+	  
+	  -h --help pour l'aide.
 	  """
 
 #Paramètres du script
@@ -204,7 +206,9 @@ def distinfini(w1,w2):
 
 #Programme :
 if len(args) < 1:
-	print u"Erreur : aucun corpus spécifié"
+	print u"ERREUR : aucun corpus spécifié"
+	print ""
+	print usage
 	sys.exit(1)
 
 
